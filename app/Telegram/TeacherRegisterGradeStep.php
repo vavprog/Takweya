@@ -36,19 +36,6 @@ class TeacherRegisterGradeStep
                 'chat_id' => $chatId,
                 'text' => 'Grade not found',
             ]);
-        } else if ($grade->slug == "university") {
-            \Session::put('teacher.grade', $grade->id);
-
-            $reply_markup = Telegram\Bot\Keyboard\Keyboard::remove();
-
-            Telegram::sendMessage([
-                'chat_id' => $chatId,
-                'text' => 'What is your phone?',
-                'reply_markup' => $reply_markup
-            ]);
-            $stepOfUser->action = 'teacherRegisterPhoneStep';
-            $stepOfUser->save();
-
         } else {
             \Session::put('teacher.grade', $grade->id);
 

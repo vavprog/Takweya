@@ -83,14 +83,9 @@ class StudentRegisterEmailStep
                     "\nPassword: " . $password .
                     "\nUser name: " . $userName .
                     "\nFirst Name: " . $firstName .
-                    "\nLast Name: " . $lastName
-//                    "\nYou can change your account using a provide link \nhttps://takweya.com/" .
-//                    "\nPlease initialize a new session /start as student",
-            ]);
-
-            Telegram::sendMessage([
-                'chat_id' => $chatId,
-                'text' => "Thank you for signing up! \nWe will send you a message as soon as we are ready to launch!"
+                    "\nLast Name: " . $lastName .
+                    "\nYou can change your account using a provide link \nhttps://takweya.com/" .
+                    "\nPlease initialize a new session /start as student",
             ]);
 
             $stepOfUser->action = null;

@@ -17,7 +17,7 @@ class UsersTableSeeder extends Seeder
             'first_name' => 'Admin',
             'last_name' => 'Admin',
             'email' => 'admin@gmail.com',
-            'password' => 'admin777'
+            'password' => 'admin'
         ]);
 
         $role = Sentinel::findRoleBySlug('admin');

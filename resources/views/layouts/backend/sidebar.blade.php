@@ -23,13 +23,14 @@
       <li class="treeview">
         <a href="#">
           <i class="fa fa-pencil"></i>
-          <span>Users</span>
+          <span>Users Emails</span>
           <span class="pull-right-container">
             <i class="fa fa-angle-left pull-right"></i>
           </span>
         </a>
         <ul class="treeview-menu">
-          <li><a href="{{ route('admin.users.index') }}"><i class="fa fa-circle-o"></i> Users</a></li>
+          <li><a href="{{ route('admin.user-emails.index') }}"><i class="fa fa-circle-o"></i> Users Emails</a></li>
+          {{--<li><a href="{{ route('admin.users.create') }}"><i class="fa fa-circle-o"></i> Add user</a></li>--}}
         </ul>
       </li>
     </ul>

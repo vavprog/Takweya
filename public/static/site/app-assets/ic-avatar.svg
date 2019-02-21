@@ -1,0 +1,26 @@
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <circle id="path-1" cx="15" cy="15" r="15"></circle>
+        <circle id="path-3" cx="15" cy="15" r="15"></circle>
+    </defs>
+    <g id="Main" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="A01---Main---v003-alternative" transform="translate(-1278.000000, -21.000000)">
+            <g id="Group-Copy-23" transform="translate(1266.000000, 12.000000)">
+                <g id="ic-/-ic-avatar" transform="translate(12.000000, 9.000000)">
+                    <g>
+                        <mask id="mask-2" fill="white">
+                            <use xlink:href="#path-1"></use>
+                        </mask>
+                        <use id="Mask" fill="#3CC476" xlink:href="#path-1"></use>
+                        <rect id="Rectangle" fill="#FFFFFF" mask="url(#mask-2)" x="4" y="20" width="22" height="13" rx="6.5"></rect>
+                        <rect id="Rectangle-2" fill="#FFFFFF" mask="url(#mask-2)" x="10" y="7" width="10" height="11" rx="5"></rect>
+                        <mask id="mask-4" fill="white">
+                            <use xlink:href="#path-3"></use>
+                        </mask>
+                        <circle stroke="#3CC476" cx="15" cy="15" r="14.5"></circle>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

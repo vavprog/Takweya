@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Support\Facades\Session;
 use Sentinel;
 
 class UserMiddleware
@@ -20,7 +19,6 @@ class UserMiddleware
         if (Sentinel::check()) {
             return $next($request);
         } else {
-            Session::put('loginRedirect', $request->url());
             return redirect('/login');
         }
     }

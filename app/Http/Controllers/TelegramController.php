@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Board;
 use App\Lesson;
 use App\Profile;
 use App\Proposal;
+use App\Room;
+use App\RoomToken;
 use App\Step;
+use App\Student;
 use App\Teacher;
 use App\Telegram\AuthorizeStudentStep;
 use App\Telegram\AuthorizeTeacherStep;
@@ -22,14 +26,25 @@ use App\Telegram\TeacherRegisterPhoneStep;
 use App\Telegram\TeacherRegisterSubjectStep;
 use App\Telegram\TeacherRegisterEmailStep;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Sentinel;
 use Telegram\Bot\Api;
 use Telegram;
 use Telegram\Bot\Keyboard\Keyboard;
+use Twilio\Jwt\AccessToken;
+use Twilio\Jwt\Grants\VideoGrant;
+use Twilio\Rest\Client;
 
 class TelegramController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->sid = config('services.twilio.sid');
+        $this->token = config('services.twilio.token');
+        $this->key = config('services.twilio.key');
+        $this->secret = config('services.twilio.secret');
+    }
+
     public function me()
     {
         $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
@@ -65,129 +80,234 @@ class TelegramController extends Controller
 
         try {
 
-//            if ($updates->isType('callback_query')) {
-//                $telegram->answerCallbackQuery([
-//                    'callback_query_id' => $updates->callbackQuery->id
-//                ]);
-//
-//                $stepOfUser = Step::firstOrCreate(['telegram_id' => $updates->callbackQuery->from->id,
-//                    'telegram_id' => $updates->callbackQuery->from->id]);
-//
-//                if ($stepOfUser->action == "teacherOnline") {
-//
-//                    $id = $updates->callbackQuery->from->id;
-//                    $message = $updates->callbackQuery->data;
-//
-//                    $parameters = explode(' ', $message);
-//
-//                    if ($parameters[0] == "/accept") {
-//
-//                        $lesson = Lesson::where('id', $parameters[1])
-//                            ->where('teacher_id', null)->first();
-//
-//                        if ($lesson) {
-//
-//                            $profile = Profile::where("telegram_id", $id)->first();
-//
-//                            $proposal = Proposal::where('lesson_id', $lesson->id)
-//                                ->where('teacher_id', $profile->user->teacher->id)->first();
-//
-//                            if (!$proposal) {
-//
-//                                $telegram
-//                                    ->sendMessage([
-//                                        'chat_id' => $id,
-//                                        'text' => "Great, we are waiting for student response."
-//                                    ]);
-//
-//                                Proposal::create([
-//                                    'lesson_id' => $lesson->id,
-//                                    'teacher_id' => $profile->user->teacher->id
-//                                ]);
-//                            } else {
-//                                $telegram
-//                                    ->sendMessage([
-//                                        'chat_id' => $id,
-//                                        'text' => "You have already submit request."
-//                                    ]);
-//                            }
-//
-//                        } else {
-//                            $telegram
-//                                ->sendMessage([
-//                                    'chat_id' => $id,
-//                                    'text' => "Teacher was selected, or lesson not found"
-//                                ]);
-//                        }
-//
-//                    } else if ($parameters[0] == "/decline") {
-//                        $telegram
-//                            ->sendMessage([
-//                                'chat_id' => $id,
-//                                'text' => "Ok"
-//                            ]);
-//                    }
-//
-//                    return "Ok";
-//
-//                } else if ($stepOfUser->action == "studentIsChooseTeacher") {
-//
-//                    $id = $updates->callbackQuery->from->id;
-//                    $message = $updates->callbackQuery->data;
-//
-//                    $parameters = explode(' ', $message);
-//
-//
-//                    if ($parameters[0] == "/select") {
-//
-//                        $lesson = Lesson::where('id', $parameters[2])->where('teacher_id', null)->first();
-//
-//                        if ($lesson) {
-//                            $lesson->teacher_id = $parameters[1];
-//                            $lesson->save();
-//
-//                            Telegram::sendMessage([
-//                                'chat_id' => $id,
-//                                'text' => "Great, here is a link for your online class.",
-//                            ]);
-//
-//                            $teacher = Teacher::where('id', $parameters[1])->first();
-//
-//                            Telegram::sendMessage([
-//                                'chat_id' => $teacher->user->profile->telegram_id,
-//                                'text' => "Here is a link your class is waiting.",
-//                            ]);
-//
-//
-//                            $proposals = $lesson->proposals()->get();
-//
-//                            foreach ($proposals as $proposal) {
-//
-//                                $teacher = Teacher::where('id', $proposal->teacher_id)->first();
-//
-//                                if ($teacher->id != $parameters[1]) {
-//                                    Telegram::sendMessage([
-//                                        'chat_id' => $teacher->user->profile->telegram_id,
-//                                        'text' => "Student was start session with other teacher, sorry.",
-//                                    ]);
-//                                }
-//                            }
-//
-//                            $stepOfUser->action = null;
-//                            $stepOfUser->save();
-//                        }
-//                    } else {
-//
-//                        Telegram::sendMessage([
-//                            'chat_id' => $id,
-//                            'text' => "Please select teacher",
-//                        ]);
-//                    }
-//
-//                }
-//
-//                return "Ok";
-//            }
+            if ($updates->isType('callback_query')) {
+                $telegram->answerCallbackQuery([
+                    'callback_query_id' => $updates->callbackQuery->id
+                ]);
+
+                $stepOfUser = Step::firstOrCreate(['telegram_id' => $updates->callbackQuery->from->id,
+                    'telegram_id' => $updates->callbackQuery->from->id]);
+
+                if ($stepOfUser->action == "teacherOnline") {
+
+                    $id = $updates->callbackQuery->from->id;
+                    $message = $updates->callbackQuery->data;
+
+                    $parameters = explode(' ', $message);
+
+                    if ($parameters[0] == "/accept") {
+
+                        $lesson = Lesson::where('id', $parameters[1])
+                            ->where('teacher_id', null)->first();
+
+                        if ($lesson) {
+
+                            $profile = Profile::where("telegram_id", $id)->first();
+
+                            $proposal = Proposal::where('lesson_id', $lesson->id)
+                                ->where('teacher_id', $profile->user->teacher->id)->first();
+
+                            if (!$proposal) {
+
+                                $telegram
+                                    ->sendMessage([
+                                        'chat_id' => $id,
+                                        'text' => "Great, we are waiting for student response."
+                                    ]);
+
+                                Proposal::create([
+                                    'lesson_id' => $lesson->id,
+                                    'teacher_id' => $profile->user->teacher->id
+                                ]);
+                            } else {
+                                $telegram
+                                    ->sendMessage([
+                                        'chat_id' => $id,
+                                        'text' => "You have already submit request."
+                                    ]);
+                            }
+
+                        } else {
+                            $telegram
+                                ->sendMessage([
+                                    'chat_id' => $id,
+                                    'text' => "Teacher was selected, or lesson not found"
+                                ]);
+                        }
+
+                    } else if ($parameters[0] == "/decline") {
+                        $telegram
+                            ->sendMessage([
+                                'chat_id' => $id,
+                                'text' => "Ok"
+                            ]);
+                    }
+
+                    return "Ok";
+
+                } else if ($stepOfUser->action == "studentIsChooseTeacher") {
+
+                    $id = $updates->callbackQuery->from->id;
+                    $message = $updates->callbackQuery->data;
+
+                    $parameters = explode(' ', $message);
+
+
+                    if ($parameters[0] == "/select") {
+
+                        $lesson = Lesson::where('id', $parameters[2])->where('teacher_id', null)->first();
+
+                        if ($lesson) {
+                            $lesson->teacher_id = $parameters[1];
+                            $lesson->save();
+
+                            $teacher = Teacher::where('id', $parameters[1])->first();
+
+                            //Create lesson with board and video API
+
+                            // Create aww whiteboard
+                            $client = new \GuzzleHttp\Client();
+                            $res = $client->request('POST', 'https://awwapp.com/api/v2/admin/boards/create', [
+                                'form_params' => [
+                                    'secret' => '9c2a03a7-b001-4337-b8de-5787058a290e',
+                                    'domain' => 'https://dev.takweya.com/'
+                                ]
+                            ]);
+
+                            $answer = json_decode($res->getBody(), true);
+
+                            $board = Board::create([
+                                'lesson_id' => $lesson->id,
+                                'board_id' => $answer['board']['_id'],
+                                'link' => $answer['board']['boardLink'],
+                            ]);
+
+                            //Create twilio API
+
+                            $client = new Client($this->sid, $this->token);
+
+                            $exists = $client->video->rooms->read(['uniqueName' => $board->link]);
+
+                            if (empty($exists)) {
+                                $twilioRoom = $client->video->rooms->create([
+                                    'uniqueName' => $board->link,
+                                    'type' => 'group-small',
+                                    'recordParticipantsOnConnect' => false
+                                ]);
+
+
+                                \Log::debug("created new room: " . $twilioRoom->uniqueName);
+                            }
+
+                            $room = new Room();
+                            $room->lesson_id = $lesson->id;
+                            $room->room_id = $twilioRoom->sid;
+                            $room->link = $twilioRoom->uniqueName;
+                            $room->save();
+
+                            \Log::debug("created eloquent room: " . $twilioRoom->uniqueName);
+
+                            // CREATE TOKENS FOR USERS
+
+
+                            //Teacher
+
+                            $identity = $teacher->user->email;
+
+                            $token = new AccessToken($this->sid, $this->key, $this->secret, 3600, $identity);
+
+                            \Log::debug("created AccessToken");
+
+                            $videoGrant = new VideoGrant();
+                            $videoGrant->setRoom($room->room_id);
+
+                            \Log::debug("created VideoGrant");
+
+                            $token->addGrant($videoGrant);
+
+                            \Log::debug("add Grant");
+
+                            $roomToken = new RoomToken();
+                            $roomToken->token = $token->toJWT();
+                            $roomToken->user_id = $teacher->user->id;
+                            $roomToken->lesson_id = $lesson->id;
+                            $roomToken->save();
+
+                            \Log::debug("create RoomToken");
+
+                            //Student
+                            $studentProfile = Profile::where('telegram_id', $id)->first();
+
+                            \Log::debug("get student");
+
+
+                            $identity = $studentProfile->user->email;
+
+                            \Log::debug("get student email");
+
+                            $token = new AccessToken($this->sid, $this->key, $this->secret, 3600, $identity);
+                            \Log::debug("access token");
+
+                            $videoGrant = new VideoGrant();
+                            $videoGrant->setRoom($room->room_id);
+
+                            \Log::debug("set room");
+
+                            $token->addGrant($videoGrant);
+
+                            \Log::debug("add grant");
+
+                            $roomToken = new RoomToken();
+                            $roomToken->token = $token->toJWT();
+                            $roomToken->user_id = $studentProfile->user->id;
+                            $roomToken->lesson_id = $lesson->id;
+                            $roomToken->save();
+
+                            \Log::debug("add room token student");
+
+
+                            Telegram::sendMessage([
+                                'chat_id' => $id,
+                                'text' => "Great, here is a link for your online class https://dev.takweya.com/board?awwBoard=$board->link",
+                            ]);
+
+                            $teacher = Teacher::where('id', $parameters[1])->first();
+
+                            Telegram::sendMessage([
+                                'chat_id' => $teacher->user->profile->telegram_id,
+                                'text' => "Here is a link your class is waiting https://dev.takweya.com/board?awwBoard=$board->link",
+                            ]);
+
+
+                            $proposals = $lesson->proposals()->get();
+
+                            foreach ($proposals as $proposal) {
+
+                                $teacher = Teacher::where('id', $proposal->teacher_id)->first();
+
+                                if ($teacher->id != $parameters[1]) {
+                                    Telegram::sendMessage([
+                                        'chat_id' => $teacher->user->profile->telegram_id,
+                                        'text' => "Student was start session with other teacher, sorry.",
+                                    ]);
+                                }
+                            }
+
+                            $stepOfUser->action = null;
+                            $stepOfUser->save();
+                        }
+                    } else {
+
+                        Telegram::sendMessage([
+                            'chat_id' => $id,
+                            'text' => "Please select teacher",
+                        ]);
+                    }
+
+                }
+
+                return "Ok";
+            }
 
             if (isset($request['message']['text'])) {
                 $this->commandBot($request);
@@ -312,21 +432,21 @@ class TelegramController extends Controller
             case "studentRegisterEmailStep":
                 return new StudentRegisterEmailStep();
                 break;
-//            case "authorizeTeacher":
-//                return new AuthorizeTeacherStep();
-//                break;
-//            case "teacherOnline":
-//                return new TeacherOnlineStep();
-//                break;
-//            case "teacherOffline":
-//                return new TeacherOfflineStep();
-//                break;
-//            case "authorizeStudent":
-//                return new AuthorizeStudentStep();
-//                break;
-//            case "studentWriteMaterialForTeacher":
-//                return new StudentWriteMaterialForTeacherStep();
-//                break;
+            case "authorizeTeacher":
+                return new AuthorizeTeacherStep();
+                break;
+            case "teacherOnline":
+                return new TeacherOnlineStep();
+                break;
+            case "teacherOffline":
+                return new TeacherOfflineStep();
+                break;
+            case "authorizeStudent":
+                return new AuthorizeStudentStep();
+                break;
+            case "studentWriteMaterialForTeacher":
+                return new StudentWriteMaterialForTeacherStep();
+                break;
             default:
                 return new DefaultStep();
                 break;
@@ -337,57 +457,47 @@ class TelegramController extends Controller
     {
         $chatId = $request['message']['chat']['id'];
 
-//        $name = isset($request['message']['chat']['first_name']) ? $request['message']['chat']['first_name'] : "";
-//        $message = "Hello " . $name . "\nWelcome to Takweaya!";
-//        $this->showMessage($chatId, $message);
+        $name = isset($request['message']['chat']['first_name']) ? $request['message']['chat']['first_name'] : "";
+        $message = "Hello " . $name . "\nWelcome to Takweaya!";
+        $this->showMessage($chatId, $message);
 
         $profile = Profile::where('telegram_id', $chatId)->first();
 
         if ($profile) {
 
-//            if ($profile->user->inRole("teacher")) {
-//
-//                $message = "Please write /online when you are ready to be on the online list to get notifications. \nOnce you're done, send /offline so that you stop evening notification";
-//
-//                $this->showMessage($chatId, $message);
-//
-//                $stepOfUser->action = "authorizeTeacher";
-//                $stepOfUser->save();
-//
-//                return "Ok";
-//
-//            } else {
-//
-//                $message = "What subject do you need help in? \nPlease type name of subject";
-//
-//                $uniqueSubjects = $profile->user->student->grade->subjects;
-//
-//                foreach ($uniqueSubjects as $subject) {
-//                    $message .= "\n - " . $subject->name;
-//                }
-//
-//                $this->showMessage($chatId, $message);
-//
-//                $stepOfUser->action = "authorizeStudent";
-//                $stepOfUser->save();
-//
-//                return "Ok";
-//            }
+            if ($profile->user->inRole("teacher")) {
 
-            $message = "Thank you";
+                $message = "Please write /online when you are ready to be on the online list to get notifications. \nOnce you're done, send /offline so that you stop evening notification";
 
-            $this->showMessage($chatId, $message);
-            $stepOfUser->action = null;
-            $stepOfUser->save();
+                $this->showMessage($chatId, $message);
 
-            return "Ok";
+                $stepOfUser->action = "authorizeTeacher";
+                $stepOfUser->save();
 
+                return "Ok";
 
+            } else {
+
+                $message = "What subject do you need help in? \nPlease type name of subject";
+
+                $uniqueSubjects = $profile->user->student->grade->subjects;
+//                $uniqueSubjects = DB::table('teachers')
+//                    ->select('subject')
+//                    ->groupBy('subject')
+//                    ->get();
+
+                foreach ($uniqueSubjects as $subject) {
+                    $message .= "\n - " . $subject->name;
+                }
+
+                $this->showMessage($chatId, $message);
+
+                $stepOfUser->action = "authorizeStudent";
+                $stepOfUser->save();
+
+                return "Ok";
+            }
         } else {
-
-            $name = isset($request['message']['chat']['first_name']) ? $request['message']['chat']['first_name'] : "";
-            $message = "Hello " . $name . "\nWelcome to Takweaya!";
-            $this->showMessage($chatId, $message);
 
             //Clear sessions
             if (\Session::has('teacher')) {

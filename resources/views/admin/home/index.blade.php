@@ -36,8 +36,8 @@
                         <span class="info-box-icon bg-red"><i class="ion ion-ios-paper"></i></span>
 
                         <div class="info-box-content">
-                            <span class="info-box-text">Students</span>
-                            <span class="info-box-number">{{ $studentsCount }}</span>
+                            <span class="info-box-text">Mails</span>
+                            <span class="info-box-number">{{ $jobsCount }}</span>
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -53,8 +53,8 @@
                         <span class="info-box-icon bg-green"><i class="ion ion-email"></i></span>
 
                         <div class="info-box-content">
-                            <span class="info-box-text">Teachers</span>
-                            <span class="info-box-number">{{ $teachersCount }}</span>
+                            <span class="info-box-text">Messages</span>
+                            <span class="info-box-number">{{ $requestsCount }}</span>
                         </div>
                         <!-- /.info-box-content -->
                     </div>
@@ -91,7 +91,7 @@
                                             <img src="{{ asset('/storage/img/users/user1.png') }}" alt="Post Image">
                                         </div>
                                         <div class="product-info">
-                                            <a href="/admin" class="product-title">{{$user->email}}
+                                            <a href="/admin/users/{{$user->id}}/edit" class="product-title">{{$user->email}}
                                                 <span class="label label-warning pull-right">{{$user->created_at}}</span></a>
                                             <span class="product-description">
                                                 {{ $user->full_name }}

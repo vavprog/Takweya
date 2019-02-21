@@ -14,7 +14,7 @@
 /* Admins routes */
 Route::group(['middleware' => 'admin', 'namespace' => 'Admin'], function () {
     Route::get('/admin', 'HomeController@index');
-    Route::resource('/admin/users', 'UserController', ['as' => 'admin']);
+    Route::resource('/admin/user-emails', 'UserEmailController', ['as' => 'admin']);
 });
 
 /* Visitors routes */
@@ -34,17 +34,19 @@ Route::group(['middleware' => 'user'], function () {
         Route::get('/', 'HomeController@index');
         Route::get('/edit-profile', 'ProfileController@edit');
         Route::post('/edit-profile', 'ProfileController@update');
+        Route::get('board', 'HomeController@board');
+        Route::post('/finish-lesson', 'HomeController@finishLesson');
     });
 });
 
 Route::get('/', 'SiteController@index');
-Route::get('/contact', 'SiteController@contact');
+Route::post('/save-email', 'SiteController@saveEmail');
 /* Telegram routes */
 //Route::get('me', 'TelegramController@me');
 //Route::get('updates', 'TelegramController@updates');
 //Route::get('respond', 'TelegramController@respond');
-//Route::get('setWebHook', 'TelegramController@setWebHook');
-//Route::get('removeWebHook', 'TelegramController@removeWebhook');
+Route::get('setWebHook', 'TelegramController@setWebHook');
+Route::get('removeWebHook', 'TelegramController@removeWebhook');
 //Route::post(env('TELEGRAM_BOT_TOKEN').'/webhook', 'TelegramController@webhook');
 //Route::get('/Telegram/{code}', 'TelegramController@telegram');
 

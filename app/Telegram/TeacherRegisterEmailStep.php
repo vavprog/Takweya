@@ -79,38 +79,28 @@ class TeacherRegisterEmailStep
                 'grade_id' => $grade->id
             ]);
 
-            $subjectsNameString = "";
             $subjects = \Session::get('teacher.subjects');
 
-            if ($subjects) {
-                $teacher->subjects()->attach(array_keys($subjects));
-                $subjectsNameString = implode(', ', $subjects);
-            }
+            $teacher->subjects()->attach(array_keys($subjects));
+
+            $subjectsNameString = implode(', ', $subjects);
 
             $role = Sentinel::findRoleBySlug('teacher');
             $role->users()->attach($user);
 
-            $text = "Your account was created successfully!." .
-                "\nGrade: " . $grade->name;
-
-            if ($subjectsNameString) {
-                $text .= "\nSubjects: " . $subjectsNameString;
-            }
-            $text .= "\nPhone: " . \Session::get('teacher.phone') .
-                "\nEmail: " . \Session::get('teacher.email') .
-                "\nPassword: " . $password .
-                "\nUser name: " . $userName .
-                "\nFirst Name: " . $firstName .
-                "\nLast Name: " . $lastName;
-
             Telegram::sendMessage([
                 'chat_id' => $chatId,
-                'text' => $text
-            ]);
-
-            Telegram::sendMessage([
-                'chat_id' => $chatId,
-                'text' => "Thank you for signing up! \nWe will email you with the application form soon."
+                'text' => "Your account was created successfully!." .
+                    "\nGrade: " . $grade->name .
+                    "\nSubjects: " . $subjectsNameString .
+                    "\nPhone: " . \Session::get('teacher.phone') .
+                    "\nEmail: " . \Session::get('teacher.email') .
+                    "\nPassword: " . $password .
+                    "\nUser name: " . $userName .
+                    "\nFirst Name: " . $firstName .
+                    "\nLast Name: " . $lastName .
+                    "\nYou can change your account using a provide link \nhttps://takweya.com/" .
+                    "\nPlease initialize a new session /start as teacher",
             ]);
 
             $stepOfUser->action = null;

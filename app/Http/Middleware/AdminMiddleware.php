@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Sentinel;
-use Illuminate\Support\Facades\Session;
 
 class AdminMiddleware
 {
@@ -20,8 +19,7 @@ class AdminMiddleware
         if (Sentinel::check() && Sentinel::inRole('admin')) {
                 return $next($request);
         } else {
-            Session::put('loginRedirect', $request->url());
-            return redirect('/login');
+            return redirect('/');
         }
     }
 }

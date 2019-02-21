@@ -52,4 +52,9 @@ class User extends EloquentUser
     {
         return $this->hasOne(Profile::class, 'user_id', 'id');
     }
+
+    public function roomTokens()
+    {
+        return $this->hasMany(RoomToken::class, 'user_id', 'id');
+    }
 }

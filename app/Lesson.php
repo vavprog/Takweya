@@ -27,4 +27,14 @@ class Lesson extends Model
     {
         return $query->where('student_id', "!=", null)->where('teacher_id', "!=", null);
     }
+
+    public function board()
+    {
+        return $this->hasOne(Board::class, 'lesson_id', 'id');
+    }
+
+    public function room()
+    {
+        return $this->hasOne(Room::class, 'lesson_id');
+    }
 }

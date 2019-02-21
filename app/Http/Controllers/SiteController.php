@@ -2,6 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Board;
+use App\UserEmail;
+use Sentinel;
+use Illuminate\Http\Request;
+use Twilio\Jwt\AccessToken;
+use Twilio\Jwt\Grants\VideoGrant;
+use Twilio\Rest\Client;
+
 class SiteController extends Controller
 {
     public function index()
@@ -9,9 +17,14 @@ class SiteController extends Controller
         return view('site.index');
     }
 
-    public function contact()
+    public function saveEmail(Request $request)
     {
-        return view('site.contact');
-    }
+        $this->validate($request, [
+            'email' => 'required|string|email|max:255'
+        ]);
 
+        UserEmail::create($request->all());
+
+        return redirect('/');
+    }
 }

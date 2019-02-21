@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Session;
 use Sentinel;
 use Cartalyst\Sentinel\Checkpoints\ThrottlingException;
 use Cartalyst\Sentinel\Checkpoints\NotActivatedException;
@@ -19,7 +18,7 @@ class LoginController extends Controller
     public function postLogin(Request $request)
     {
         $this->validate($request, [
-            'email' => 'required|email',
+            'email' => 'required',
             'password' => 'required',
         ]);
 
@@ -31,13 +30,9 @@ class LoginController extends Controller
             }
 
             if (Sentinel::authenticate($request->all(), $remember)) {
-                $redirect = Session::get('loginRedirect', '/');
-                Session::forget('loginRedirect');
-
-                return redirect()->to($redirect);
+                return redirect('/');
             } else {
-                return redirect()->back()->with(['error' => 'These credentials do not match our records.'])
-                    ->withInput(['email' => $request->input('email')]);
+                return redirect()->back()->with(['error' => 'Wrong credentials.']);
             }
         } catch (ThrottlingException $e) {
             $delay = $e->getDelay();

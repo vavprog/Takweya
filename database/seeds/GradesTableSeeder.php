@@ -24,10 +24,6 @@ class GradesTableSeeder extends Seeder
                 'name' => 'Cycle3 (10-12)',
                 'slug' => str_slug('Cycle3 (10-12)')
             ],
-            [
-                'name' => 'University',
-                'slug' => str_slug('University')
-            ],
         ]);
     }
 }

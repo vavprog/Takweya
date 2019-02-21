@@ -20,6 +20,7 @@ class CreateLessonsTable extends Migration
             $table->integer('teacher_id')->unsigned()->nullable();
             $table->foreign('teacher_id')->references('id')->on('teachers')->onDelete('cascade');
             $table->text('description');
+            $table->integer('is_completed')->default(0);
             $table->timestamps();
         });
     }
