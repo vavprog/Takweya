@@ -170,7 +170,7 @@ class TelegramController extends Controller
                             $res = $client->request('POST', 'https://awwapp.com/api/v2/admin/boards/create', [
                                 'form_params' => [
                                     'secret' => '9c2a03a7-b001-4337-b8de-5787058a290e',
-                                    'domain' => 'https://dev.takweya.com/'
+                                    'domain' => 'https://develop.takweya.com/'
                                 ]
                             ]);
 
@@ -268,14 +268,14 @@ class TelegramController extends Controller
 
                             Telegram::sendMessage([
                                 'chat_id' => $id,
-                                'text' => "Great, here is a link for your online class https://dev.takweya.com/board?awwBoard=$board->link",
+                                'text' => "Great, here is a link for your online class https://develop.takweya.com/board?awwBoard=$board->link",
                             ]);
 
                             $teacher = Teacher::where('id', $parameters[1])->first();
 
                             Telegram::sendMessage([
                                 'chat_id' => $teacher->user->profile->telegram_id,
-                                'text' => "Here is a link your class is waiting https://dev.takweya.com/board?awwBoard=$board->link",
+                                'text' => "Here is a link your class is waiting https://develop.takweya.com/board?awwBoard=$board->link",
                             ]);
 
 

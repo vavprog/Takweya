@@ -144,7 +144,7 @@ class HomeController extends Controller
         $res = $client->request('DELETE', "https://awwapp.com/api/v2/admin/boards/{$lesson->board->board_id}/delete", [
             'form_params' => [
                 'secret' => '9c2a03a7-b001-4337-b8de-5787058a290e',
-                'domain' => 'https://dev.takweya.com/'
+                'domain' => 'https://develop.takweya.com/'
             ]
         ]);
 
