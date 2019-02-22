@@ -84,7 +84,7 @@ class StudentRegisterEmailStep
                     "\nUser name: " . $userName .
                     "\nFirst Name: " . $firstName .
                     "\nLast Name: " . $lastName .
-                    "\nYou can change your account using a provide link \nhttps://takweya.com/" .
+                    "\nYou can change your account using a provide link \nhttps://develop.takweya.com/" .
                     "\nPlease initialize a new session /start as student",
             ]);
 

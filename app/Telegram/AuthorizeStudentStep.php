@@ -81,7 +81,7 @@ class AuthorizeStudentStep
 //                    ->where('subject', $userSubject)
 //                    ->where('is_online', 1)->count();
 
-                $message = "We have found {$countOfTeachers} teachers for you who are ready to help you! \n - Your balance is: {$balanceOfUser} \n - Please log in through \nhttps://takweya.com/edit-profile \nto purchase tutoring minute and initialize a new session /start";
+                $message = "We have found {$countOfTeachers} teachers for you who are ready to help you! \n - Your balance is: {$balanceOfUser} \n - Please log in through \nhttps://develop.takweya.com/edit-profile \nto purchase tutoring minute and initialize a new session /start";
 
                 Telegram::sendMessage([
                     'chat_id' => $chatId,
